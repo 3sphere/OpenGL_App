@@ -1,0 +1,8 @@
+﻿  Camera.cpp
+f:\opengl projects\opengl\src\camera.cpp(46): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+f:\opengl projects\opengl\src\camera.cpp(47): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+f:\opengl projects\opengl\src\camera.cpp(51): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+f:\opengl projects\opengl\src\camera.cpp(52): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+f:\opengl projects\opengl\src\camera.cpp(53): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+f:\opengl projects\opengl\src\camera.cpp(54): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  OpenGL.vcxproj -> F:\OpenGL Projects\OpenGL\Debug\OpenGL.exe
