@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <SDL.h>
 
 class Camera
 {
@@ -11,7 +12,7 @@ public:
 	void setMouseSensitivity(float sens) { mouseSensitivity = sens; }
 	void setMovementSpeed(float speed) { movementSpeed = speed; }
 
-	void processInput(const uint8_t* keyboardState, int mouseX, int mouseY);
+	void processInput(SDL_Event* e);
 	void update(float deltaTime);
 
 private:
@@ -24,14 +25,9 @@ private:
 	float yaw;
 	float pitch;
 	float movementSpeed;
-	float forwardSpeed;
-	float rightSpeed;
+	int dirForward;
+	int dirRight;
 	float mouseSensitivity;
-
-	// For mouse input
-	float lastX;
-	float lastY;
-	bool firstMouse;
 
 	static const float MOVEMENT_SPEED;
 	static const float MOUSE_SENSITIVITY;

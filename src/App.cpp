@@ -106,6 +106,8 @@ void App::processInput()
 		{
 			isRunning = false;
 		}
+
+		camera->processInput(&e);
 	}
 }
 

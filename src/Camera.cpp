@@ -11,45 +11,49 @@ Camera::Camera(const glm::vec3& pos, float yaw_, float pitch_, float speed, floa
 	yaw(yaw_),
 	pitch(pitch_),
 	movementSpeed(speed),
-	forwardSpeed(0.0f),
-	rightSpeed(0.0f),
-	mouseSensitivity(sens),
-	firstMouse(true)
+	dirForward(0),
+	dirRight(0),
+	mouseSensitivity(sens)
 {
 	updateCameraVectors();
 }
 
-void Camera::processInput(const uint8_t* keyboardState, int mouseX, int mouseY)
+void Camera::processInput(SDL_Event* e)
 {
-	// keyboard input
-	forwardSpeed = rightSpeed = 0.0f;
+	// Keyboard input
+	const Uint8* keyboardState = SDL_GetKeyboardState(nullptr);
+	dirForward = dirRight = 0;
 	if (keyboardState[SDL_SCANCODE_W])
 	{
-		forwardSpeed += movementSpeed;
+		dirForward += 1;
 	}
 	if (keyboardState[SDL_SCANCODE_S])
 	{
-		forwardSpeed -= movementSpeed;
+		dirForward -= 1;
 	}
 	if (keyboardState[SDL_SCANCODE_A])
 	{
-		rightSpeed -= movementSpeed;
+		dirRight -= 1;
 	}
 	if (keyboardState[SDL_SCANCODE_D])
 	{
-		rightSpeed += forwardSpeed;
+		dirRight += 1;
 	}
 
-	// mouse input
-	
+	// Mouse input
+	if (e->type == SDL_MOUSEMOTION)
+	{
+		yaw += e->motion.xrel * mouseSensitivity;
+		pitch -= e->motion.yrel * mouseSensitivity;
 
-	if (pitch > 89.0f)
-	{
-		pitch = 89.0f;
-	}
-	else if (pitch < -89.0f)
-	{
-		pitch = -89.0f;
+		if (pitch > 89.0f)
+		{
+			pitch = 89.0f;
+		}
+		else if (pitch < -89.0f)
+		{
+			pitch = -89.0f;
+		}
 	}
 
 	updateCameraVectors();
@@ -57,17 +61,20 @@ void Camera::processInput(const uint8_t* keyboardState, int mouseX, int mouseY)
 
 void Camera::update(float deltaTime)
 {
-	//position += front * dir.y * movementSpeed * deltaTime;
-	//position += right * dir.x * movementSpeed * deltaTime;
+	if (dirRight != 0.0f || dirForward != 0.0f)
+	{
+		glm::vec3 direction = glm::normalize(front * (float)dirForward + right * (float)dirRight);
+		position += direction * movementSpeed * deltaTime;
+	}
 }
 
 void Camera::updateCameraVectors()
 {
-	glm::vec3 front;
-	front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
-	front.y = sin(glm::radians(pitch));
-	front.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
-	front = glm::normalize(front);
+	glm::vec3 newFront;
+	newFront.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
+	newFront.y = sin(glm::radians(pitch));
+	newFront.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
+	front = glm::normalize(newFront);
 	right = glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f)));
 	up = glm::normalize(glm::cross(right, front));
 }
