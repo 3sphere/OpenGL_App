@@ -3,7 +3,6 @@
 #include <memory>
 #include "Shader.h"
 #include "Texture2D.h"
-#include "Camera.h"
 
 class App : public OpenGLApp
 {
@@ -18,9 +17,8 @@ private:
 	void render() override;
 	void shutdown() override;
 
-	std::unique_ptr<Shader> program;
-	std::unique_ptr<Texture2D> texture;
-	std::unique_ptr<Camera> camera;
+	std::shared_ptr<Shader> program;
+	std::shared_ptr<Texture2D> texture;
 	unsigned int vao;
 };
 

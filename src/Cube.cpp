@@ -1,40 +1,10 @@
-#include "App.h"
-#include <glad/glad.h>
-#include <SDL_opengl.h>
-#include <iostream>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include "Cube.h"
+#include <glad/glad.h>
+#include <glm/gtc/matrix_transform.hpp>
+#include "OpenGLApp.h"
 
-/*
-* TODO: Abstract VAO/EBO/VBO stuff into a class
-*/
-
-App::App(unsigned int width_, unsigned int height_) :
-	OpenGLApp(width_, height_),
-	vao(0)
-{
-}
-
-App::~App()
-{
-	shutdown();
-}
-
-void App::setup()
-{
-	SDL_SetWindowGrab(window, SDL_TRUE);
-	SDL_SetRelativeMouseMode(SDL_TRUE);
-
-	glViewport(0, 0, width, height);
-	glEnable(GL_DEPTH_TEST);
-
-	program = std::make_unique<Shader>("glsl/basic.vert", "glsl/basic.frag");
-	texture = std::make_unique<Texture2D>("textures/container2.png");
-	camera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 3.0f));
-
-	float vertices[] = {
+const std::vector<float> Cube::vertices = {
+	// position			  // texture coords
 	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 	 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
 	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
@@ -76,59 +46,47 @@ void App::setup()
 	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
 	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
 	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-	};
+};
 
+Cube::Cube(OpenGLApp* owner_, std::shared_ptr<Texture2D> texture_, const glm::vec3& position_, const glm::vec3& scale_, float rotX_, float rotY_, float rotZ_) :
+	BasicObject(owner_, texture_, position_, scale_, rotX_, rotY_, rotZ_)
+{
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
 	unsigned int vbo;
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
+	// Position
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+	// Texture coordinates
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 }
 
-void App::processInput()
+void Cube::render(std::shared_ptr<Shader> shader)
 {
-	SDL_Event e;
-	while (SDL_PollEvent(&e)) 
-	{
-		if (e.type == SDL_QUIT)
-		{
-			isRunning = false;
-		}
+	// Set up model, view, and projection matrices
+	glm::mat4 model(1.0f);
+	model = glm::translate(model, position);
+	model = glm::rotate(model, glm::radians(rotX), glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, glm::radians(rotY), glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(model, glm::radians(rotZ), glm::vec3(0.0f, 0.0f, 1.0f));
+	model = glm::scale(model, scale);
+	glm::mat4 view = owner->getCamera()->getViewMatrix();
+	glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)owner->getWidth() / owner->getHeight(), 0.1f, 100.0f);
 
-		const Uint8* keyState = SDL_GetKeyboardState(nullptr);
-		if (keyState[SDL_SCANCODE_ESCAPE])
-		{
-			isRunning = false;
-		}
+	texture->bind();
 
-		camera->processInput(&e);
-	}
-}
+	shader->use();
+	shader->setMat4f("model", model);
+	shader->setMat4f("view", view);
+	shader->setMat4f("projection", projection);
+	shader->setInt("tex", 0);
 
-void App::logic(float deltaTime)
-{
-	camera->update(deltaTime);
-}
-
-void App::render()
-{
-	glClearColor(0, 0, 0, 1);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	Cube cube(this, texture);
-	cube.render(program);
-
-	SDL_GL_SwapWindow(window);
-}
-
-void App::shutdown()
-{
-
+	glBindVertexArray(vao);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 }

@@ -2,6 +2,8 @@
 #include <glad/glad.h>
 #include <SDL.h>
 #include <SDL_opengl.h>
+#include <memory>
+#include "Camera.h"
 
 class OpenGLApp
 {
@@ -10,6 +12,9 @@ public:
 	virtual ~OpenGLApp();
 
 	void run();
+	std::shared_ptr<Camera> getCamera() const { return camera; }
+	unsigned int getWidth() const { return width; }
+	unsigned int getHeight() const { return height; }
 
 protected:
 	virtual void setup() = 0;
@@ -22,6 +27,8 @@ protected:
 	unsigned int width;
 	unsigned int height;
 	bool isRunning;
+
+	std::shared_ptr<Camera> camera;
 
 private:
 	SDL_GLContext glContext;
