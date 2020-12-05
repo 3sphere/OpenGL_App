@@ -3,6 +3,8 @@
 #include <memory>
 #include "Shader.h"
 #include "Texture2D.h"
+#include "BasicObject.h"
+#include <vector>
 
 class App : public OpenGLApp
 {
@@ -19,6 +21,6 @@ private:
 
 	std::shared_ptr<Shader> program;
 	std::shared_ptr<Texture2D> texture;
-	unsigned int vao;
+	std::vector<std::shared_ptr<BasicObject>> objects;
 };
 
